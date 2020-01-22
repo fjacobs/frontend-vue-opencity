@@ -1,54 +1,54 @@
 <template>
   <div class="maps">
     <h1>{{ msg }}</h1>
-    <div id="myMap"></div>
+    <div id="myMap" />
   </div>
 </template>
 
 <script>
-import MapLoader from "../utils/MapLoader.ts";
-import RSocketGeojsonClient from "../utils/RsocketGeojsonClient.ts";
-import TravelTimeService from "../utils/TravelTime.ts";
-import initNotificationTable from "../utils/NotificationTable.ts";
+import MapLoader from '../utils/MapLoader.ts'
+import RSocketGeojsonClient from '../utils/RsocketGeojsonClient.ts'
+import TravelTimeService from '../utils/TravelTime.ts'
+import initNotificationTable from '../utils/NotificationTable.ts'
 
-const STREAM_LIVE = "TRAVELTIME_STREAM";
-const STREAM_HISTORY = "TRAVELTIME_HISTORY";
+const STREAM_LIVE = 'TRAVELTIME_STREAM'
+// const STREAM_HISTORY = "TRAVELTIME_HISTORY";
 
-const url = "ws://localhost:9897/rsocket";
-let key = "AIzaSyB6SSvjmmzWA9zOVHhh4IsBbp3qqY25qas";
+const url = 'ws://localhost:9897/rsocket'
+const key = 'AIzaSyB6SSvjmmzWA9zOVHhh4IsBbp3qqY25qas'
 
 export default {
-  name: "Hello",
-  data() {
+  name: 'Hello',
+  data () {
     return {
-      msg: "Smart City"
-    };
+      msg: 'Smart City'
+    }
   },
-  mounted: async function() {
-    let map;
-    let googleMapsApi;
+  mounted: async function () {
+    let map
+    let googleMapsApi
 
     try {
-      googleMapsApi = await MapLoader.getGoogleMapsApi(key);
-      map = await MapLoader.createMap(googleMapsApi);
+      googleMapsApi = await MapLoader.getGoogleMapsApi(key)
+      map = await MapLoader.createMap(googleMapsApi)
     } catch (error) {
-      console.error("Error loading map. " + error);
+      console.error('Error loading map. ' + error)
     }
 
-    initNotificationTable();
+    initNotificationTable()
 
     try {
-      let travelTimeService = new TravelTimeService(
+      const travelTimeService = new TravelTimeService(
         map,
         googleMapsApi,
         new RSocketGeojsonClient(url)
-      );
-      await travelTimeService.subscribe(STREAM_LIVE);
+      )
+      await travelTimeService.subscribe(STREAM_LIVE)
     } catch (error) {
-      console.error("Error in traveltime service: " + error);
+      console.error('Error in traveltime service: ' + error)
     }
   }
-};
+}
 </script>
 <style scoped>
 #myMap {

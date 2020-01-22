@@ -1,7 +1,11 @@
 <template>
   <v-container>
     <v-layout justify-center>
-      <v-flex xs12 sm10 md8>
+      <v-flex
+        xs12
+        sm10
+        md8
+      >
         <material-card
           color="primary"
           title="Vuetify Material Dashboard PRO"
@@ -11,8 +15,12 @@
             <thead>
               <tr>
                 <th />
-                <th class="subheading font-weight-light">Free</th>
-                <th class="subheading font-weight-light">PRO</th>
+                <th class="subheading font-weight-light">
+                  Free
+                </th>
+                <th class="subheading font-weight-light">
+                  PRO
+                </th>
               </tr>
             </thead>
             <tbody class="text-xs-center">
@@ -42,10 +50,14 @@
                   Login, Register, Pricing, Lock Pages
                 </th>
                 <td>
-                  <v-icon color="error">mdi-close</v-icon>
+                  <v-icon color="error">
+                    mdi-close
+                  </v-icon>
                 </td>
                 <td>
-                  <v-icon color="success">mdi-check</v-icon>
+                  <v-icon color="success">
+                    mdi-check
+                  </v-icon>
                 </td>
               </tr>
               <tr>
@@ -53,10 +65,14 @@
                   Premium Support
                 </th>
                 <td>
-                  <v-icon color="error">mdi-close</v-icon>
+                  <v-icon color="error">
+                    mdi-close
+                  </v-icon>
                 </td>
                 <td>
-                  <v-icon color="success">mdi-check</v-icon>
+                  <v-icon color="success">
+                    mdi-check
+                  </v-icon>
                 </td>
               </tr>
               <tr>
@@ -67,15 +83,21 @@
               <tr>
                 <th />
                 <td>
-                  <v-btn color="grey" disabled>Current Version</v-btn>
+                  <v-btn
+                    color="grey"
+                    disabled
+                  >
+                    Current Version
+                  </v-btn>
                 </td>
                 <td>
                   <v-btn
                     color="success"
                     target="_blank"
                     href="https://www.creative-tim.com/product/vuetify-material-dashboard-pro?ref=vtymd-upgrade-page"
-                    >Upgrade to Pro</v-btn
                   >
+                    Upgrade to Pro
+                  </v-btn>
                 </td>
               </tr>
             </tbody>
