@@ -57,7 +57,7 @@
             <v-icon>mdi-package-up</v-icon>
           </v-list-tile-action>
           <v-list-tile-title class="font-weight-light">
-            Upgrade To PRO
+            Button 1
           </v-list-tile-title>
         </v-list-tile>
       </v-layout>
