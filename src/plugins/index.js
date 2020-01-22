@@ -1,3 +1,3 @@
-import './axios'
-import './chartist'
-import './vuetify'
+import "./axios";
+import "./chartist";
+import "./vuetify";
