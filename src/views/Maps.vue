@@ -1,33 +1,34 @@
 <template>
-  <div>
-    <div class="mapouter">
-      <div class="gmap_canvas">
-        <iframe
-          id="gmap_canvas"
-          width="100%"
-          height="100%"
-          src="https://maps.google.com/maps?q=google&t=&z=13&ie=UTF8&iwloc=&output=embed"
-          frameborder="0"
-          scrolling="no"
-          marginheight="0"
-          marginwidth="0"
-        />
-      </div>
+
+    <div class="maps">
+        <h1>{{ msg }}</h1>
+        <div id="myMap"></div>
     </div>
-  </div>
+
 </template>
 
-<style>
-.mapouter {
-  text-align:right;
-  height:100%;
-  width:100%;
-  position: absolute;
-}
-.gmap_canvas {
-  overflow:hidden;
-  background:none!important;
-  height:100%;
-  width:100%;
-}
+<script>
+
+    export default {
+        name: 'hello',
+        data() {
+            return {
+                msg: 'Smart City'
+            }
+        },
+        mounted: function () {
+            console.log("map: ", google.maps)
+            this.map = new google.maps.Map(document.getElementById('myMap'), {
+                center: {lat: 61.180059, lng: -149.822075},
+                zoom: 4
+            })
+        }
+
+    }
+</script>
+<style scoped>
+    #myMap {
+        height: 600px;
+        width: 100%;
+    }
 </style>
