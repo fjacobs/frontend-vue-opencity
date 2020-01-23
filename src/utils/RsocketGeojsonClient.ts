@@ -7,6 +7,7 @@ export default class RSocketGeojsonClient {
 
     //@ts-ignore
     private client: RSocketClient;
+    private socket: any;
     private url: string;
     private guuid: string;
     private subscription: any;
@@ -41,14 +42,33 @@ export default class RSocketGeojsonClient {
     }
 
     closeWebsocket( ) {
-       this.client.close(); // Close websocket
+       this.client.close();
     }
 
-    requestStream(messageRoute: String, callbackRecv, onComplete) {
+     async connect(messageRoute) {
+         if (this.socket === undefined) {
+             try {
+                 this.socket = await this.client.connect();
+             } catch (error) {
+                 console.error(error);
+                 error.url = this.url + "/" + messageRoute;
+                 let connectionError = {
+                     Id: this.guuid,
+                     Name: "TravelTime RSocketClient",
+                     Description: "Could not connect to: " + error.url,
+                     Category: 3,
+                     Availability: false
+                 };
+                 // setErrorNotification(connectionError);
+             }
+         }
+     }
 
-        this.client.connect().subscribe({
-            onComplete: socket => {
-                socket.requestStream({
+    async requestStream(messageRoute: String, callbackRecv, onComplete) {
+
+        await this.connect(messageRoute)
+
+        await this.socket.requestStream({
                     data: null,
                     metadata: String.fromCharCode(messageRoute.length) + messageRoute,
                 }).subscribe({
@@ -59,8 +79,14 @@ export default class RSocketGeojsonClient {
                     onError: error => {
                         console.error(error);
 
-                        error.url = this.url+"/"+messageRoute;
-                        let streamError = {Id:this.guuid, Name:"TravelTime.rSocketClient", Description:"Error during streaming: "+ error, Category: 3, Availability: false };
+                        error.url = this.url + "/" + messageRoute;
+                        let streamError = {
+                            Id: this.guuid,
+                            Name: "TravelTime.rSocketClient",
+                            Description: "Error during streaming: " + error,
+                            Category: 3,
+                            Availability: false
+                        };
                         // setErrorNotification(streamError);
                     },
                     onNext: payload => {
@@ -70,26 +96,16 @@ export default class RSocketGeojsonClient {
                         subscription.request(2147483647);
                         this.subscription = subscription;
                     },
-                });
-            },
 
-            onError: error => {
-                console.error(error);
-                error.url = this.url+"/"+messageRoute;
-                let connectionError = {Id: this.guuid, Name:"TravelTime RSocketClient", Description:"Could not connect to: " + error.url, Category: 3, Availability: false };
-                // setErrorNotification(connectionError);
-            },
-            onSubscribe: cancel => {
-                /* call cancel() to abort */},
         });
     }
 
     async requestResponse(messageRoute: String) {
 
-        const socket = await this.client.connect();
+        this.connect(messageRoute)
 
         return new Promise ((resolve, reject) => {
-            socket.requestResponse({
+            this.socket.requestResponse({
                 data: null,
                 metadata: String.fromCharCode(messageRoute.length) + messageRoute,
             })
