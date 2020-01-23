@@ -49,10 +49,9 @@ export default class TravelTimeService {
     createRoadPopup = (feature: Feature, clickPos: LatLng) => {
 
         let infoWindow = new this.googleMapsApi.InfoWindow();
-
         let html = "<div> <b> Weginformatie </b> </div>";
         html +=    "<div>Naam:" + feature.getProperty("Name") + "</div>";
-        html += "<div>ID : " + feature.getProperty("Id") + "</div>";
+        html += "<div>ID : " + feature.getId() + "</div>";
         html += "<div>Lengte:  " + feature.getProperty("Length") + " meter</div>";
         html += "<div>Snelheid: " + feature.getProperty("Velocity") + " km/u</div>";
         html += "<div>Huidige reistijd: " + Math.floor(feature.getProperty("Traveltime") / 60) + ":" + ("0" + feature.getProperty("Traveltime") % 60).slice(-2) + "</div>";

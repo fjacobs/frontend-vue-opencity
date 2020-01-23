@@ -32,7 +32,7 @@ export default class MapLoader {
 
         // @ts-ignore
         return new Promise((resolve) => {
-            let map = new googleMaps.Map(document.getElementById('map'), mapOptions);
+            let map = new googleMaps.Map(document.getElementById('myMap'), mapOptions);
             resolve(map);
         });
     }
