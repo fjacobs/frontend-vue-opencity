@@ -21,7 +21,7 @@
          </material-card>
 
 
-<!--     Control ---------------------------------->
+<!--  REWIND HISTORY Control ---------------------------------->
 
         <material-card
            color="black"
@@ -36,7 +36,6 @@
           Replay
           </v-btn>
 
-          <!--    REWIND HISTORY-->
           <v-snackbar
             v-model="snackbar"
             :top="top"
@@ -72,19 +71,21 @@ import RSocketGeojsonClient from '../utils/RsocketGeojsonClient.ts'
 import TravelTimeService from '../utils/TravelTime.ts'
 
 const STREAM_LIVE = 'TRAVELTIME_STREAM'
-// const STREAM_HISTORY = "TRAVELTIME_HISTORY";
+const STREAM_HISTORY = "TRAVELTIME_HISTORY";
 
 const url = 'ws://localhost:9897/rsocket'
 const key = 'AIzaSyB6SSvjmmzWA9zOVHhh4IsBbp3qqY25qas'
 
 export default {
   name: 'Hello',
+  roadService: undefined,
   data ()
   {
     return {
       msg: '',
       top: true,
-      snackbar: false
+      snackbar: false,
+      roadService: this.roadService
     }
   },
   mounted: async function () {
@@ -98,12 +99,12 @@ export default {
       console.error('Error loading map. ' + error)
     }
     try {
-      const travelTimeService = new TravelTimeService(
+      this.roadService = new TravelTimeService(
         map,
         googleMapsApi,
         new RSocketGeojsonClient(url)
       )
-      await travelTimeService.subscribe(STREAM_LIVE)
+      await this.roadService.subscribe(STREAM_LIVE)
     } catch (error) {
       console.error('Error in traveltime service: ' + error)
     }
@@ -112,9 +113,15 @@ export default {
     callServerMethod() {
       console.log("request - stream call...");
     },
-    snack () {
-      this.top = true
-      this.snackbar = true
+    async snack() {
+        this.top = true
+        this.snackbar = true
+        try {
+            this.roadService.cancelSubscription();
+            await this.roadService.subscribe(STREAM_HISTORY)
+        } catch (error) {
+            console.error('Error replaying history. ' + error)
+        }
     }
   }
 }

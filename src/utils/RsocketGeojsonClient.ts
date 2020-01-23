@@ -9,6 +9,7 @@ export default class RSocketGeojsonClient {
     private client: RSocketClient;
     private url: string;
     private guuid: string;
+    private subscription: any;
 
     constructor(url: string) {
 
@@ -35,30 +36,13 @@ export default class RSocketGeojsonClient {
         } );
     }
 
-
-    async requestResponse(messageRoute: String) {
-
-       const socket = await this.client.connect();
-
-       return new Promise ((resolve, reject) => {
-            socket.requestResponse({
-                data: null,
-                metadata: String.fromCharCode(messageRoute.length) + messageRoute,
-            })
-            .subscribe({
-                onComplete: complete => resolve(complete),
-                onError: error => {
-                    reject(error);
-                },
-                onNext(payload: any) {
-                    console.log('onNext(%s)', payload.data);
-                },
-            });
-            setTimeout(() => {
-            }, 30000000);
-        })
+    cancelSubscription() {
+        this.subscription.cancel()
     }
 
+    closeWebsocket( ) {
+       this.client.close(); // Close websocket
+    }
 
     requestStream(messageRoute: String, callbackRecv, onComplete) {
 
@@ -73,6 +57,8 @@ export default class RSocketGeojsonClient {
                         onComplete(messageRoute);
                     },
                     onError: error => {
+                        console.error(error);
+
                         error.url = this.url+"/"+messageRoute;
                         let streamError = {Id:this.guuid, Name:"TravelTime.rSocketClient", Description:"Error during streaming: "+ error, Category: 3, Availability: false };
                         // setErrorNotification(streamError);
@@ -82,11 +68,13 @@ export default class RSocketGeojsonClient {
                     },
                     onSubscribe: subscription => {
                         subscription.request(2147483647);
+                        this.subscription = subscription;
                     },
                 });
             },
 
             onError: error => {
+                console.error(error);
                 error.url = this.url+"/"+messageRoute;
                 let connectionError = {Id: this.guuid, Name:"TravelTime RSocketClient", Description:"Could not connect to: " + error.url, Category: 3, Availability: false };
                 // setErrorNotification(connectionError);
@@ -95,5 +83,29 @@ export default class RSocketGeojsonClient {
                 /* call cancel() to abort */},
         });
     }
+
+    async requestResponse(messageRoute: String) {
+
+        const socket = await this.client.connect();
+
+        return new Promise ((resolve, reject) => {
+            socket.requestResponse({
+                data: null,
+                metadata: String.fromCharCode(messageRoute.length) + messageRoute,
+            })
+                .subscribe({
+                    onComplete: complete => resolve(complete),
+                    onError: error => {
+                        reject(error);
+                    },
+                    onNext(payload: any) {
+                        console.log('onNext(%s)', payload.data);
+                    },
+                });
+            setTimeout(() => {
+            }, 30000000);
+        })
+    }
+
 
 }

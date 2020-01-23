@@ -21,7 +21,20 @@ export default class TravelTimeService {
         });
     }
 
-    receiveFeature = (payload) => {
+    async subscribe(route) {
+        await this.rsocketClient.requestStream(route, this.addFeatureToMap.bind(this), this.onComplete.bind(this));
+    }
+
+    cancelSubscription() {
+       this.rsocketClient.cancelSubscription()
+    }
+
+    closeConnection() {
+        this.rsocketClient.closeWebsocket();
+    }
+
+
+    addFeatureToMap = (payload) => {
         this.map.data.addGeoJson(payload.data);
     }
 
@@ -69,12 +82,6 @@ export default class TravelTimeService {
 
     onComplete() {
         console.log("oncomplete in service");
-    }
-
-
-
-    async subscribe(route) {
-        this.rsocketClient.requestStream(route, this.receiveFeature.bind(this), this.onComplete.bind(this));
     }
 
     speedToColor(type, speed) {
