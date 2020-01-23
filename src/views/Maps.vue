@@ -1,5 +1,4 @@
 <template>
-
   <v-container
     fill-height
     fluid
@@ -7,25 +6,65 @@
   >
     <v-layout
       justify-center
-      wrap
+      align-center
     >
       <v-flex md12>
+         <material-card
+            color="black"
+            title="Smart City - Amsterdam"
+            text="Road information"
+
+          >
+          <div class="maps">
+            <div id="myMap" />
+          </div>
+         </material-card>
+
+
+<!--     Control ---------------------------------->
+
         <material-card
-          color="green"
-          title="Smart City"
-          text="Road information"
+           color="black"
+           title="Control Panel"
+           text="Rewind history"
         >
-      <div class="maps">
-        <div id="myMap" />
-      </div>
-       </material-card>
+          <button @click="callServerMethod">Request Stream</button>
+          <v-btn
+            color="success"
+            @click="snack()"
+          >
+          Replay
+          </v-btn>
+
+          <!--    REWIND HISTORY-->
+          <v-snackbar
+            v-model="snackbar"
+            :top="top"
+            dark
+          >
+          <div>
+                <b> Rewinding history </b>
+          </div>
+          <v-icon
+             size="16"
+             @click="snackbar = false"
+          >
+          </v-icon>
+         </v-snackbar>
+
+        </material-card>
+
       </v-flex>
+
       <h1>{{ msg }}</h1>
 
   </v-layout>
 
   </v-container>
+
 </template>
+
+
 
 <script>
 import MapLoader from '../utils/MapLoader.ts'
@@ -43,7 +82,9 @@ export default {
   data ()
   {
     return {
-      msg: ''
+      msg: '',
+      top: true,
+      snackbar: false
     }
   },
   mounted: async function () {
@@ -65,6 +106,15 @@ export default {
       await travelTimeService.subscribe(STREAM_LIVE)
     } catch (error) {
       console.error('Error in traveltime service: ' + error)
+    }
+  },
+  methods: {
+    callServerMethod() {
+      console.log("request - stream call...");
+    },
+    snack () {
+      this.top = true
+      this.snackbar = true
     }
   }
 }

@@ -25,7 +25,7 @@ export default class MapLoader {
 
         // @ts-ignore
         let mapOptions = {
-            zoom: 13,
+            zoom: 12,
             center: new googleMaps.LatLng(52.37063538130748, 4.899999460629829),
             mapTypeId: googleMaps.MapTypeId.TERRAIN
         };
