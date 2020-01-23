@@ -9,9 +9,10 @@
         "moduleResolution": "node",
         "experimentalDecorators": true,
         "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
         "sourceMap": true,
         "baseUrl": ".",
+        "allowSyntheticDefaultImports": true,
+        "plugins": [{ "name": "ts-vue-plugin" }],
         "types": [
             "webpack-env"
         ],
@@ -28,6 +29,7 @@
         ]
     },
     "include": [
+        "src/**/*.js",
         "src/**/*.ts",
         "src/**/*.tsx",
         "src/**/*.vue",

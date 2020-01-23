@@ -24,7 +24,7 @@ import './plugins'
 import { sync } from 'vuex-router-sync'
 
 // Application imports
-import App from './App'
+import App from './App.vue'
 import router from '@/router'
 import store from '@/store'
 
