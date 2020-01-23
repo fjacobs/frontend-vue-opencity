@@ -12,7 +12,6 @@
         "sourceMap": true,
         "baseUrl": ".",
         "allowSyntheticDefaultImports": true,
-        "plugins": [{ "name": "ts-vue-plugin" }],
         "types": [
             "webpack-env"
         ],
