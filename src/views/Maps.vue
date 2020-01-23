@@ -21,34 +21,22 @@
          </material-card>
 
 
-<!--  REWIND HISTORY Control ---------------------------------->
+<!--   Control Panel ---------------------------------->
 
-        <material-card
-           color="black"
-           title="Control Panel"
-           text="Rewind history"
-        >
-          <button @click="callServerMethod">Request Stream</button>
-          <v-btn
-            color="success"
-            @click="snack()"
-          >
-          Replay
-          </v-btn>
+        <material-card color="black" title="Control Panel">
+            <v-btn color="success" @click="streamLive()">
+                Live stream
+            </v-btn>
 
-          <v-snackbar
-            v-model="snackbar"
-            :top="top"
-            dark
-          >
-          <div>
-                <b> Rewinding history </b>
-          </div>
-          <v-icon
-             size="16"
-             @click="snackbar = false"
-          >
-          </v-icon>
+            <v-btn color="success" @click="streamHistory()">
+                Replay
+            </v-btn>
+
+          <v-snackbar v-model="notif" :top="top" dark>
+              <div>
+                    <b> Replay history </b>
+              </div>
+              <v-icon size="16" @click="notif = false"></v-icon>
          </v-snackbar>
 
         </material-card>
@@ -84,7 +72,7 @@ export default {
     return {
       msg: '',
       top: true,
-      snackbar: false,
+      notif: false,
       roadService: this.roadService
     }
   },
@@ -108,14 +96,20 @@ export default {
     } catch (error) {
       console.error('Error in traveltime service: ' + error)
     }
-  },
-  methods: {
-    callServerMethod() {
-      console.log("request - stream call...");
+  },  methods: {
+     async streamLive() {
+         this.top = true
+         this.notif = true
+         try {
+             this.roadService.cancelSubscription();
+             await this.roadService.subscribe(STREAM_LIVE)
+         } catch(error) {
+             console.error('Error live streaming. ' + error)
+         }
     },
-    async snack() {
+    async streamHistory() {
         this.top = true
-        this.snackbar = true
+        this.notif = true
         try {
             this.roadService.cancelSubscription();
             await this.roadService.subscribe(STREAM_HISTORY)
