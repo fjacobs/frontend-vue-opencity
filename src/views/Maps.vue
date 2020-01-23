@@ -9,7 +9,6 @@
 import MapLoader from '../utils/MapLoader.ts'
 import RSocketGeojsonClient from '../utils/RsocketGeojsonClient.ts'
 import TravelTimeService from '../utils/TravelTime.ts'
-import initNotificationTable from '../utils/NotificationTable.ts'
 
 const STREAM_LIVE = 'TRAVELTIME_STREAM'
 // const STREAM_HISTORY = "TRAVELTIME_HISTORY";
@@ -34,9 +33,6 @@ export default {
     } catch (error) {
       console.error('Error loading map. ' + error)
     }
-
-    initNotificationTable()
-
     try {
       const travelTimeService = new TravelTimeService(
         map,

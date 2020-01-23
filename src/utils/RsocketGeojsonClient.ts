@@ -1,11 +1,11 @@
 import {APPLICATION_JSON, RSocketClient, JsonSerializer, IdentitySerializer, MESSAGE_RSOCKET_ROUTING} from "rsocket-core";
 import RSocketWebSocketClient from "rsocket-websocket-client";
-import {setErrorNotification} from "./index";
 const uuidv1 = require('uuid/v1');
 
 // @ts-ignore
 export default class RSocketGeojsonClient {
 
+    //@ts-ignore
     private client: RSocketClient;
     private url: string;
     private guuid: string;
@@ -75,7 +75,7 @@ export default class RSocketGeojsonClient {
                     onError: error => {
                         error.url = this.url+"/"+messageRoute;
                         let streamError = {Id:this.guuid, Name:"TravelTime.rSocketClient", Description:"Error during streaming: "+ error, Category: 3, Availability: false };
-                        setErrorNotification(streamError);
+                        // setErrorNotification(streamError);
                     },
                     onNext: payload => {
                         callbackRecv(payload);
@@ -89,7 +89,7 @@ export default class RSocketGeojsonClient {
             onError: error => {
                 error.url = this.url+"/"+messageRoute;
                 let connectionError = {Id: this.guuid, Name:"TravelTime RSocketClient", Description:"Could not connect to: " + error.url, Category: 3, Availability: false };
-                setErrorNotification(connectionError);
+                // setErrorNotification(connectionError);
             },
             onSubscribe: cancel => {
                 /* call cancel() to abort */},

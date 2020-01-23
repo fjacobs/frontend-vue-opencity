@@ -3,7 +3,6 @@ import {google} from '@google/maps';
 import {LatLng} from '@google/maps';
 import {Feature} from '@google/maps';
 import {event} from '@google/maps';
-import {setErrorNotification} from "./index";
 
 
 export default class TravelTimeService {
