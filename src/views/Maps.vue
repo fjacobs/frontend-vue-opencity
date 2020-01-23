@@ -1,8 +1,30 @@
 <template>
-  <div class="maps">
-    <h1>{{ msg }}</h1>
-    <div id="myMap" />
-  </div>
+
+  <v-container
+    fill-height
+    fluid
+    grid-list-xl
+  >
+    <v-layout
+      justify-center
+      wrap
+    >
+      <v-flex md12>
+        <material-card
+          color="green"
+          title="Smart City"
+          text="Road information"
+        >
+      <div class="maps">
+        <div id="myMap" />
+      </div>
+       </material-card>
+      </v-flex>
+      <h1>{{ msg }}</h1>
+
+  </v-layout>
+
+  </v-container>
 </template>
 
 <script>
@@ -18,9 +40,10 @@ const key = 'AIzaSyB6SSvjmmzWA9zOVHhh4IsBbp3qqY25qas'
 
 export default {
   name: 'Hello',
-  data () {
+  data ()
+  {
     return {
-      msg: 'Smart City'
+      msg: ''
     }
   },
   mounted: async function () {

@@ -75,36 +75,37 @@ export default {
   data: () => ({
     logo: 'favicon.ico',
     links: [
+      // {
+      //   to: '/',
+      //   icon: 'mdi-view-dashboard',
+      //   text: 'Dashboard'
+      // },
+      // {
+      //   to: '/user-profile',
+      //   icon: 'mdi-account',
+      //   text: 'User Profile'
+      // },
       {
-        to: '/',
-        icon: 'mdi-view-dashboard',
-        text: 'Dashboard'
-      },
-      {
-        to: '/user-profile',
-        icon: 'mdi-account',
-        text: 'User Profile'
+        to: '/maps',
+        icon: 'mdi-map-marker',
+        text: 'Map'
       },
       {
         to: '/table-list',
         icon: 'mdi-clipboard-outline',
-        text: 'Table List'
+        text: 'Log'
       },
-      {
-        to: '/typography',
-        icon: 'mdi-format-font',
-        text: 'Typography'
-      },
-      {
-        to: '/icons',
-        icon: 'mdi-chart-bubble',
-        text: 'Icons'
-      },
-      {
-        to: '/maps',
-        icon: 'mdi-map-marker',
-        text: 'Maps'
-      },
+      // {
+      //   to: '/typography',
+      //   icon: 'mdi-format-font',
+      //   text: 'Typography'
+      // },
+      // {
+      //   to: '/icons',
+      //   icon: 'mdi-chart-bubble',
+      //   text: 'Icons'
+      // },
+
       {
         to: '/notifications',
         icon: 'mdi-bell',
