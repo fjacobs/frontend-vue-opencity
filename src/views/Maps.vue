@@ -1,64 +1,96 @@
 <template>
-    <v-container
-            fill-height
-            fluid
-            grid-list-xl
+  <v-container
+      fill-height
+      fluid
+      grid-list-xl
+  >
+    <v-layout
+        justify-center
+        align-center
     >
-        <v-layout
-                justify-center
-                align-center
+      <v-flex md12>
+        <material-card
+            color="black"
+            title="Smart City - Amsterdam"
+            text="Road information"
         >
-            <v-flex md12>
-                <material-card
-                        color="black"
-                        title="Smart City - Amsterdam"
-                        text="Road information"
-                >
 
-                    <!------  Notification-->
-                    <v-snackbar v-model="notif" :top="top" dark>
-                        <div>
-                            <b> Replay history </b>
-                        </div>
-                        <v-icon size="50" @click="notif = false"></v-icon>
-                    </v-snackbar>
-                    <!------------------------------------------------------------------->
+          <!------  Notification---------------------------------------------->
+          <v-snackbar v-model="startReplay" :top="top" dark>
+            <div>
+              <b> Replay started</b>
+            </div>
+            <v-icon size="100" @click="startReplay = false"></v-icon>
+          </v-snackbar>
 
-                    <div class="maps">
-                        <div id="myMap"/>
-                    </div>
+          <v-snackbar v-model="pauseReplay" :top="top" dark>
+            <div>
+              <b> Replay paused/started </b>
+            </div>
+            <v-icon size="100" @click="pauseReplay = false"></v-icon>
+          </v-snackbar>
 
-                    <v-btn color="success" @click="streamLive()">
-                        Live stream
-                    </v-btn>
+          <v-snackbar v-model="startLive" :top="top" dark>
+            <div>
+              <b> Livestream started </b>
+            </div>
+            <v-icon size="100" @click="startReplay = false"></v-icon>
+          </v-snackbar>
 
-                    <v-btn color="success" @click="streamHistory()">
-                        Replay
-                    </v-btn>
+          <!------------------------------------------------------------------->
 
+          <div class="maps">
+            <div id="myMap"/>
+          </div>
 
-                    <v-btn color="success" @click="channelTest()">
-                        ChannelTest
-                    </v-btn>
+          <v-container fluid>
 
+            <v-row>
+              <v-col cols="12" sm="6" class="py-2" >
 
-                </material-card>
+                <v-btn color="success" @click="streamLive()">
+                  Live stream
+                </v-btn>
 
+               <p>Replay control</p>
+                <v-btn-toggle v-model="toggle_exclusive">
 
-                <!--   Control Panel ---------------------------------->
+                  <v-btn color="success" @click="streamHistory()">
+                    Start/Reset
+                  </v-btn>
 
-                <material-card color="black" title="Control Panel">
+                  <!--todo-->
+                  <v-btn color="success" @click="streamRewind()">
+                    Rewind
+                  </v-btn>
+                  <v-btn color="error" @click="streamPauze()">
+                    Pause/Resume
+                  </v-btn>
 
+                  <v-btn color="success" @click="streamFastforward()"> <!--todo-->
+                    Fast Forward
+                  </v-btn>
 
-                </material-card>
+                  <v-text-field
+                      class="purple-input"
+                      label="Replay speed"
+                  />
 
-            </v-flex>
+                </v-btn-toggle>
+              </v-col>
+            </v-row>
 
-            <h1>{{ msg }}</h1>
+          </v-container>
 
-        </v-layout>
+        </material-card>
 
-    </v-container>
+      </v-flex>
+
+      <h1>{{ msg }}</h1>
+
+    </v-layout>
+
+  </v-container>
 
 </template>
 
@@ -69,7 +101,7 @@
     import TravelTimeService from '../utils/TravelTime.ts'
 
     const STREAM_LIVE = 'TRAVELTIME_STREAM'
-    const STREAM_HISTORY = "TRAVELTIME_HISTORY";
+    const STREAM_HISTORY = "TRAVELTIME_REPLAY_MINIMAL";
 
     const url = 'ws://localhost:9897/rsocket'
     const key = 'AIzaSyB6SSvjmmzWA9zOVHhh4IsBbp3qqY25qas'
@@ -81,7 +113,10 @@
             return {
                 msg: '',
                 top: true,
-                notif: false,
+                toggle_exclusive: 2,
+                startReplay: false,
+                startLive: false,
+                pauseReplay: false,
                 roadService: this.roadService
             }
         },
@@ -108,8 +143,8 @@
         }, methods: {
             async streamLive() {
                 this.top = true
-                this.notif = true
                 try {
+                    this.startLive = true;
                     this.roadService.cancelSubscription();
                     await this.roadService.liveSubscription(STREAM_LIVE)
                 } catch (error) {
@@ -118,31 +153,47 @@
             },
             async streamHistory() {
                 this.top = true
-                this.notif = true
+                this.startReplay = true
                 try {
                     this.roadService.cancelSubscription();
-                    await this.roadService.replaySubscription(STREAM_HISTORY)
+                    await this.roadService.replaySubscription(STREAM_HISTORY, 500)
                 } catch (error) {
                     console.error('Error replaying history. ' + error)
                 }
             },
-            async channelTest() {
+
+            async streamPauze() {
                 this.top = true
-                this.notif = true
+                this.pauseReplay = true
+                try {
+                    await this.roadService.playPause();
+                } catch (error) {
+                    console.error('Error pauzeReplay. ' + error)
+                }
+            },
+            async test() {
+                this.top = true
                 try {
                     this.roadService.cancelSubscription();
-                    await this.roadService.replaySubscription(STREAM_HISTORY)
+                    await this.roadService.test()
                 } catch (error) {
                     console.error('Error replaying history. ' + error)
                 }
-            }
+            },
 
+            async streamRewind() {
+
+            },
+
+            async streamFastforward() {
+
+            },
         }
     }
 </script>
 <style scoped>
-    #myMap {
-        height: 600px;
-        width: 100%;
-    }
+  #myMap {
+    height: 600px;
+    width: 100%;
+  }
 </style>

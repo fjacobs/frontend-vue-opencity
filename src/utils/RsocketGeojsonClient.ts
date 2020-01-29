@@ -1,5 +1,8 @@
 import {APPLICATION_JSON, RSocketClient, JsonSerializer, IdentitySerializer, MESSAGE_RSOCKET_ROUTING} from "rsocket-core";
 import RSocketWebSocketClient from "rsocket-websocket-client";
+import {Flowable, Single} from "rsocket-flowable";
+import {ReactiveSocket} from "rsocket-types";
+import {ClientConfig} from "rsocket-core/RSocketClient";
 const uuidv1 = require('uuid/v1');
 
 // @ts-ignore
@@ -11,6 +14,7 @@ export default class RSocketGeojsonClient {
     private url: string;
     private guuid: string;
     private subscription: any;
+    private nextRequestN: any;
 
     constructor(url: string) {
 
@@ -45,13 +49,14 @@ export default class RSocketGeojsonClient {
        this.client.close();
     }
 
-     async connect(messageRoute) {
+     async reuseConnect() {
          if (this.socket === undefined) {
              try {
                  this.socket = await this.client.connect();
              } catch (error) {
                  console.error(error);
-                 error.url = this.url + "/" + messageRoute;
+                 error.url = this.url + "/" ; // + messageRoute
+
                  let connectionError = {
                      Id: this.guuid,
                      Name: "TravelTime RSocketClient",
@@ -64,16 +69,32 @@ export default class RSocketGeojsonClient {
          }
      }
 
-    async requestStream(messageRoute: String, callbackRecv, onComplete) {
 
-        await this.connect(messageRoute)
+    getReq_n_FromSubscription() : any {
+        console.log("getRequestN callled returning " + this.nextRequestN )
 
+        return this.nextRequestN;
+    }
+
+    setReq_n_OnSubscription(nextRequestN: any) {
+        if((nextRequestN > 0) && (this.nextRequestN ===0) ) {  //Start request it will be continued in onNext()
+            this.subscription.request(nextRequestN);
+        }
+
+        this.nextRequestN = nextRequestN;
+        console.log("setRequest callled " + this.nextRequestN )
+    }
+
+    async requestStream(messageRoute: String, callbackRecv, onComplete, data, requestN) {
+
+        this.nextRequestN = requestN;
+        await this.reuseConnect()
         await this.socket.requestStream({
-                    data: null,
+                    data: data,
                     metadata: String.fromCharCode(messageRoute.length) + messageRoute,
                 }).subscribe({
                     onComplete: () => {
-                        console.log('RSocket.requestStream onComplete() called.');
+                        console.log('RSocketGeoJsonClient::requestStream::onComplete');
                         onComplete(messageRoute);
                     },
                     onError: error => {
@@ -91,18 +112,21 @@ export default class RSocketGeojsonClient {
                     },
                     onNext: payload => {
                         callbackRecv(payload);
+                        if(this.nextRequestN  > 0) {
+                            this.subscription.request(this.nextRequestN);
+                        }
                     },
                     onSubscribe: subscription => {
-                        subscription.request(2147483647);
+                        console.log('RSocketGeoJsonClient::onSubscribe');
+                        subscription.request(this.nextRequestN);
                         this.subscription = subscription;
                     },
-
         });
     }
 
     async requestResponse(messageRoute: String) {
 
-        this.connect(messageRoute)
+        this.reuseConnect()
 
         return new Promise ((resolve, reject) => {
             this.socket.requestResponse({

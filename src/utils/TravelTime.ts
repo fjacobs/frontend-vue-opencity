@@ -3,6 +3,8 @@ import {google} from '@google/maps';
 import {LatLng} from '@google/maps';
 import {Feature} from '@google/maps';
 import {event} from '@google/maps';
+// import $ from '@types/googlemaps';
+
 
 
 export default class TravelTimeService {
@@ -11,31 +13,147 @@ export default class TravelTimeService {
     private readonly map: google.maps;
     private googleMapsApi: any;
 
-    constructor(map: google.maps.Map, api:google.maps, rSocketClient: RSocketGeojsonClient) {
+    constructor(map: google.maps.Map, api: google.maps, rSocketClient: RSocketGeojsonClient) {
         this.map = map;
         this.googleMapsApi = api;
         this.rsocketClient = rSocketClient;
         map.data.addListener('addfeature', this.addFeatureEvent);
+        map.data.addListener('setproperty', this.propertyChangeEvent);
+
         map.data.addListener('click', (event) => {
             this.createRoadPopup(event.feature, event.latLng);
         });
     }
 
-    async subscribe(route) {
-        await this.rsocketClient.requestStream(route, this.addFeatureToMap.bind(this), this.onComplete.bind(this));
+    async test() {
+        let x = await this.rsocketClient.requestResponse("test");
+        console.log(x);
+    }
+
+    async liveSubscription(route) {
+        await this.rsocketClient.requestStream(route, this.addFeatureToMap.bind(this), this.onComplete.bind(this), null, 2147483647);
+    }
+
+    async replaySubscription(route, delayElements) {
+        try {
+             await this.rsocketClient.requestStream(route, this.featureUpdateHandler.bind(this), this.onComplete.bind(this), delayElements, 1);
+
+        } catch (error) {
+            console.error("replaySubscription -> error");
+
+            console.error(error);
+        }
+    }
+
+
+    playPause() {
+
+        try {
+            let nResult = this.rsocketClient.getReq_n_FromSubscription();
+
+
+
+            console.log("Service.playPause() current is: " + nResult )
+            if(nResult !== 0) {
+                console.log("Pause the stream")
+                this.rsocketClient.setReq_n_OnSubscription(0);
+            } else {
+                console.log("Play the stream")
+                this.rsocketClient.setReq_n_OnSubscription(1);
+            }
+
+            // await this.rsocketClient.requestStream(route, this.featureUpdateHandler.bind(this), this.onComplete.bind(this), delayElements);
+
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+
+    async rewindReplay(route, delayElements) {
+        try {
+           // await this.rsocketClient.requestStream(route, this.featureUpdateHandler.bind(this), this.onComplete.bind(this), delayElements);
+
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+
+    async ffwReplay(route, delayElements) {
+        try {
+            // await this.rsocketClient.requestStream(route, this.featureUpdateHandler.bind(this), this.onComplete.bind(this), delayElements);
+
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    featureUpdateHandler = (payload) => {
+        console.log(payload.data)
+
+        payload.data.forEach((dto) => {
+            if (dto != undefined) {
+
+                let feature = this.map.data.getFeatureById(dto.Id);
+                if (feature != undefined) {
+                    console.log(feature.Id);
+                    for (let propName in dto) {
+                        feature.setProperty(propName, dto[propName]);
+                    }
+
+                } else {
+
+                    //TODO: Received new Feature...
+                    //  Request full GeoJson from backend and add to map
+                    //console.log(dto);
+                }
+            }
+        });
+    }
+
+    featureUpdateHandlerFull = (payload) => {
+
+        const LAST_SEEN_CHANGE = "lastSeenChange";
+
+        payload.data.forEach((dto) => {
+            if (dto != undefined) {
+
+                let feature = this.map.data.getFeatureById(dto.Id);
+                if (feature != undefined) {
+             //       console.log(feature.Id);
+                    for (let propName in dto) {
+                        feature.setProperty(propName, dto[propName]);
+                    }
+                    if (dto[LAST_SEEN_CHANGE] == undefined) {
+                        feature[LAST_SEEN_CHANGE] = dto[LAST_SEEN_CHANGE];
+                    }
+                } else {
+                    //TODO: Received new Feature...
+                    //      Request geometry from backend.
+                    //console.log(dto);
+                }
+            }
+        });
     }
 
     cancelSubscription() {
-       this.rsocketClient.cancelSubscription()
+        this.rsocketClient.cancelSubscription()
     }
 
     closeConnection() {
         this.rsocketClient.closeWebsocket();
     }
 
-
     addFeatureToMap = (payload) => {
+        let feature = payload.data;
         this.map.data.addGeoJson(payload.data);
+
+    }
+
+    propertyChangeEvent = (event) => {
+      //  console.log(event.feature);
+        this.paintFeature(event.feature);
     }
 
     paintFeature = (feature: Feature) => {
@@ -63,7 +181,7 @@ export default class TravelTimeService {
 
         let infoWindow = new this.googleMapsApi.InfoWindow();
         let html = "<div> <b> Weginformatie </b> </div>";
-        html +=    "<div>Naam:" + feature.getProperty("Name") + "</div>";
+        html += "<div>Naam:" + feature.getProperty("Name") + "</div>";
         html += "<div>ID : " + feature.getId() + "</div>";
         html += "<div>Lengte:  " + feature.getProperty("Length") + " meter</div>";
         html += "<div>Snelheid: " + feature.getProperty("Velocity") + " km/u</div>";
@@ -72,7 +190,7 @@ export default class TravelTimeService {
 
         infoWindow.setContent(html);
         infoWindow.setPosition(clickPos);
-        infoWindow.setOptions({pixelOffset: new this.googleMapsApi.Size(0,-34)});
+        infoWindow.setOptions({pixelOffset: new this.googleMapsApi.Size(0, -34)});
         infoWindow.open(this.map);
     }
 
@@ -88,10 +206,26 @@ export default class TravelTimeService {
         let speedColors;
         if (type === "H") {
             //Highway
-            speedColors = {0: "#D0D0D0", 1: "#BE0000", 30: "#FF0000", 50: "#FF9E00", 70: "#FFFF00", 90: "#AAFF00",120: "#00B22D"};
+            speedColors = {
+                0: "#D0D0D0",
+                1: "#BE0000",
+                30: "#FF0000",
+                50: "#FF9E00",
+                70: "#FFFF00",
+                90: "#AAFF00",
+                120: "#00B22D"
+            };
         } else {
             //Other roads
-             speedColors = {0: "#D0D0D0", 1: "#BE0000", 10: "#FF0000", 20: "#FF9E00", 30: "#FFFF00", 40: "#AAFF00", 70: "#00B22D"};
+            speedColors = {
+                0: "#D0D0D0",
+                1: "#BE0000",
+                10: "#FF0000",
+                20: "#FF9E00",
+                30: "#FFFF00",
+                40: "#AAFF00",
+                70: "#00B22D"
+            };
         }
         var currentColor = "#D0D0D0";
         for (var i in speedColors) {
